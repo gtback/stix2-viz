@@ -19,6 +19,7 @@ canvas.style.height = height;
 
 refRegex = /_ref$/;
 var force = d3.layout.force().charge(-120).linkDistance(d3Config.linkMultiplier * d3Config.nodeSize).size([width, height]);
+var labelForce = d3.layout.force().gravity(0).linkDistance(25).linkStrength(8).charge(-120).size([width, height]);
 var svg = d3.select('svg');
 var typeGroups = {};
 var typeIndex = 0;
@@ -28,9 +29,12 @@ var currentGraph = {
   edges: []
 }
 
-var idCache = {};
+var labelGraph = {
+  nodes: [],
+  edges: []
+}
 
-console.log(d3Config);
+var idCache = {};
 
 function handleFileSelect(evt) {
   handleFiles(evt.target.files);
@@ -69,27 +73,24 @@ function addToGraph(package) {
 
 function initGraph() {
   force.nodes(currentGraph.nodes).links(currentGraph.edges).start();
+  labelForce.nodes(labelGraph.nodes).links(labelGraph.edges).start();
 
-  var link = svg.selectAll('.link').data(currentGraph.edges).enter().append('line').attr('class', 'link');
+  var link = svg.selectAll('line.link').data(currentGraph.edges).enter().append('line').attr('class', 'link');
 
-  var node = svg.selectAll(".node")
+  var node = svg.selectAll("circle.node")
       .data(currentGraph.nodes)
     .enter().append("circle")
       .attr("class", "node")
       .attr("r", d3Config.nodeSize)
       .style("fill", function(d) { return d3Config.color(d.typeGroup); })
       .call(force.drag);
-
-  node.append('title').text(function(d) {
-    if(d.type === 'relationship') {
-      return "relationship: " + (d.value || d.relationship_nature);
-    } else if (d.title !== undefined) {
-      return d.title;
-    } else {
-      return d.type;
-    }
-  });
   node.on('click', function(d, i) {selectedContainer.innerText = JSON.stringify(d, null, 2)})
+
+  var anchorNode = svg.selectAll("g.anchorNode").data(labelForce.nodes()).enter().append("svg:g").attr("class", "anchorNode");
+  anchorNode.append("svg:circle").attr("r", 0).style("fill", "#FFF");
+		anchorNode.append("svg:text").text(function(d, i) {
+		return i % 2 == 0 ? "" : titleFor(d.node);
+	}).style("fill", "#555").style("font-family", "Arial").style("font-size", 12);
 
   force.on("tick", function() {
     link.attr("x1", function(d) { return d.source.x; })
@@ -99,6 +100,32 @@ function initGraph() {
 
     node.attr("cx", function(d) { return d.x; })
         .attr("cy", function(d) { return d.y; });
+
+    anchorNode.each(function(d, i) {
+      labelForce.start();
+			if(i % 2 == 0) {
+				d.x = d.node.x;
+				d.y = d.node.y;
+			} else {
+				var b = this.childNodes[1].getBBox();
+
+				var diffX = d.x - d.node.x;
+				var diffY = d.y - d.node.y;
+
+				var dist = Math.sqrt(diffX * diffX + diffY * diffY);
+
+				var shiftX = b.width * (diffX - dist) / (dist * 2);
+				shiftX = Math.max(-b.width, Math.min(0, shiftX));
+				var shiftY = 5;
+				this.childNodes[1].setAttribute("transform", "translate(" + shiftX + "," + shiftY + ")");
+			}
+		});
+
+    anchorNode.call(function() {
+			this.attr("transform", function(d) {
+				return "translate(" + d.x + "," + d.y + ")";
+			});
+		});
   });
 }
 
@@ -144,6 +171,16 @@ function buildNodes(package) {
   });
 }
 
+function titleFor(tlo) {
+  if(tlo.type === 'relationship') {
+    return "rel: " + (tlo.value || d.relationship_nature);
+  } else if (tlo.title !== undefined) {
+    return tlo.title;
+  } else {
+    return tlo.type;
+  }
+}
+
 function addTlo(tlo, tempEdges) {
   if(idCache[tlo.id]) {
     console.log("Already added, skipping!", tlo)
@@ -155,6 +192,15 @@ function addTlo(tlo, tempEdges) {
 
     idCache[tlo.id] = currentGraph.nodes.length; // Edges reference nodes by their array index, so cache the current length. When we add, it will be correct
     currentGraph.nodes.push(tlo);
+
+    labelGraph.nodes.push({node: tlo}); // Two labels will orbit the node, we display the less crowded one and hide the more crowded one.
+    labelGraph.nodes.push({node: tlo});
+
+    labelGraph.edges.push({
+			source : (labelGraph.nodes.length - 2),
+			target : (labelGraph.nodes.length - 1),
+      weight: 1
+		});
 
     // Now, look for edges...any property ending in "_ref"
     Object.keys(tlo).forEach(function(key) {
