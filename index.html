@@ -1,0 +1,35 @@
+<html lang="en">
+
+  <head>
+    <title>STIX Viewer</title>
+    <link rel="stylesheet" type="all" href="application.css" />
+  </head>
+
+  <body>
+    <h1>STIX Visualizer <span id="chosen-files"></span></h1>
+
+    <div id="uploader">
+      <p>Drop some STIX 2.0 here!</p>
+      <input type="file" id="files" name="files" />
+    </div>
+    <div id="canvas-container" style="display: none;">
+      <div id="sidebar">
+        <div id="legend">
+          <h2>Legend</h2>
+          <ul id="legend-content"></ul>
+        </div>
+        <div id="selected">
+          <h2>Selected Node</h2>
+          <pre id="selection">
+
+          </pre>
+        </div>
+      </div>
+      <svg id="canvas"></svg>
+    </div>
+  </body>
+
+  <script src="d3/d3.min.js"></script>
+  <script src="application.js"></script>
+
+</html>

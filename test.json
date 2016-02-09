@@ -1,0 +1,116 @@
+{
+  "type": "package",
+  "id": "package--44af6c39-c09b-49c5-9de2-394224b04982",
+  "sources": [
+    {
+      "type": "information-source",
+      "id": "information-source--8ae20dde-83d4-4218-88fd-41ef0dabf9d1",
+      "name": "mitre.org",
+      "title": "MITRE"
+    },
+    {
+      "type": "information-source",
+      "id": "information-source--1c85f42b-f50d-492a-896c-2686f67acfd2",
+      "name": "FireEye",
+      "title": "FireEye"
+    }
+  ],
+  "malwares": [
+    {
+      "type": "malware",
+      "id": "malware--26ffb872-1dd9-446e-b6f5-d58527e5b5d2",
+      "title": "Some Malware",
+      "created_by_ref": "information-source--8ae20dde-83d4-4218-88fd-41ef0dabf9d1"
+    }
+  ],
+  "indicators": [
+    {
+      "type": "indicator",
+      "id": "indicator--26ffb872-1dd9-446e-b6f5-d58527e5b5d2",
+      "title": "Some indicator",
+      "created_by_ref": "information-source--8ae20dde-83d4-4218-88fd-41ef0dabf9d1"
+    }
+  ],
+  "reports": [
+    {
+      "type": "report",
+      "id": "report--3feeb34c-d6b5-4582-a457-cb61ed2580ef",
+      "title": "Poison Ivy Report",
+      "created_by_ref": "information-source--8ae20dde-83d4-4218-88fd-41ef0dabf9d1"
+    }
+  ],
+  "relationships": [
+    {
+      "type": "relationship",
+      "id": "relationship--6b0e3856-95f3-4c04-a882-116832996da1",
+      "source_ref": "indicator--26ffb872-1dd9-446e-b6f5-d58527e5b5d2",
+      "target_ref": "malware--26ffb872-1dd9-446e-b6f5-d58527e5b5d2",
+      "confidence": "high",
+      "value": "indicated-malware",
+      "created_by_ref": "information-source--8ae20dde-83d4-4218-88fd-41ef0dabf9d1"
+    },
+    {
+      "type": "relationship",
+      "id": "relationship--1199cf1b-0a79-49be-9bab-e523a0915aa1",
+      "source_ref": "malware--26ffb872-1dd9-446e-b6f5-d58527e5b5d2",
+      "target_ref": "information-source--1c85f42b-f50d-492a-896c-2686f67acfd2",
+      "confidence": "high",
+      "value": "derived-from",
+      "extended_properties": {
+        "source_url": "https://www.fireeye.com/blog/threat-research/2013/08/pivy-assessing-damage-and-extracting-intel.html"
+      },
+      "created_by_ref": "information-source--8ae20dde-83d4-4218-88fd-41ef0dabf9d1"
+    },
+    {
+      "type": "relationship",
+      "id": "relationship--1199cf1b-0a79-49be-9bab-e523a0915aa2",
+      "source_ref": "relationship--6b0e3856-95f3-4c04-a882-116832996da1",
+      "target_ref": "information-source--1c85f42b-f50d-492a-896c-2686f67acfd2",
+      "confidence": "high",
+      "value": "derived-from",
+      "extended_properties": {
+        "source_url": "https://www.fireeye.com/blog/threat-research/2013/08/pivy-assessing-damage-and-extracting-intel.html"
+      },
+      "created_by_ref": "information-source--8ae20dde-83d4-4218-88fd-41ef0dabf9d1"
+    },
+    {
+      "type": "relationship",
+      "id": "relationship--1199cf1b-0a79-49be-9bab-e523a0915aa3",
+      "source_ref": "indicator--26ffb872-1dd9-446e-b6f5-d58527e5b5d2",
+      "target_ref": "information-source--1c85f42b-f50d-492a-896c-2686f67acfd2",
+      "confidence": "high",
+      "value": "derived-from",
+      "extended_properties": {
+        "source_url": "https://www.fireeye.com/blog/threat-research/2013/08/pivy-assessing-damage-and-extracting-intel.html"
+      },
+      "created_by_ref": "information-source--8ae20dde-83d4-4218-88fd-41ef0dabf9d1"
+    },
+    {
+      "type": "relationship",
+      "id": "relationship--ca39cd5a-f3e6-4a2b-94aa-0b7fce766d81",
+      "source_ref": "malware--26ffb872-1dd9-446e-b6f5-d58527e5b5d2",
+      "target_ref": "report--3feeb34c-d6b5-4582-a457-cb61ed2580ef",
+      "confidence": "high",
+      "value": "in-report",
+      "created_by_ref": "information-source--8ae20dde-83d4-4218-88fd-41ef0dabf9d1"
+    },
+    {
+      "type": "relationship",
+      "id": "relationship--29d7595d-67dc-41c2-8ec0-6f89af706ea2",
+      "source_ref": "indicator--26ffb872-1dd9-446e-b6f5-d58527e5b5d2",
+      "target_ref": "report--3feeb34c-d6b5-4582-a457-cb61ed2580ef",
+      "confidence": "high",
+      "value": "in-report",
+      "created_by_ref": "information-source--8ae20dde-83d4-4218-88fd-41ef0dabf9d1"
+    },
+    {
+      "type": "relationship",
+      "id": "relationship--b82c3d3a-68a0-455c-bfbd-203caaea45b7",
+      "source_ref": "relationship--6b0e3856-95f3-4c04-a882-116832996da1",
+      "target_ref": "report--3feeb34c-d6b5-4582-a457-cb61ed2580ef",
+      "confidence": "high",
+      "value": "in-report",
+      "created_by_ref": "information-source--8ae20dde-83d4-4218-88fd-41ef0dabf9d1"
+    }
+  ]
+}

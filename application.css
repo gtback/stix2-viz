@@ -1,0 +1,93 @@
+html, body {
+  padding: 0;
+  margin: 0;
+  font-family: "Helvetica", sans-serif;
+  font-weight: 300;
+}
+
+h1 {
+  font-size: 36px;
+  font-weight: 300;
+  background-color: #fafafa;
+  margin: 0;
+  padding: 20px;
+}
+
+#uploader, #canvas-container {
+  position: absolute;
+  top: 81px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+#uploader {
+  text-align: center;
+  line-height: 1;
+  font-size: 36px;
+}
+
+#chosen-files {
+  margin-left: 15px;
+  font-size: 24px;
+  color: #333;
+}
+
+#sidebar {
+  position: absolute;
+  right: 25px;
+  width: 350px;
+}
+
+#sidebar h2 {
+  text-align: center;
+  margin-top: 0;
+}
+
+#legend {
+  margin-top: 25px;
+  padding: 25px;
+  background-color: #fafafa;
+}
+
+#selected {
+  margin-top: 25px;
+  padding: 25px;
+  background-color: #fafafa;
+}
+
+h2 {
+  font-weight: 200;
+}
+
+.link {
+  stroke-width: 1px;
+  stroke: #999;
+}
+
+ul {
+  list-style-type: none;
+  text-align: left;
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  padding: 0;
+  margin: 0;
+}
+
+ul li div {
+  width: 30px;
+  height: 12px;
+  display: inline-block;
+}
+
+ul > li > p {
+  display: inline-block;
+  margin: 5px;
+}
+
+pre {
+  white-space: pre-wrap;
+}
