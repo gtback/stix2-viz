@@ -80,7 +80,15 @@ function initGraph() {
       .style("fill", function(d) { return d3Config.color(d.typeGroup); })
       .call(force.drag);
 
-  node.append('title').text(function(d) {return d.title || d.type});
+  node.append('title').text(function(d) {
+    if(d.type === 'relationship') {
+      return "relationship: " + (d.value || d.relationship_nature);
+    } else if (d.title !== undefined) {
+      return d.title;
+    } else {
+      return d.type;
+    }
+  });
   node.on('click', function(d, i) {selectedContainer.innerText = JSON.stringify(d, null, 2)})
 
   force.on("tick", function() {
