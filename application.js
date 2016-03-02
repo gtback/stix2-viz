@@ -76,6 +76,7 @@ function initGraph() {
   labelForce.nodes(labelGraph.nodes).links(labelGraph.edges).start();
 
   var link = svg.selectAll('line.link').data(currentGraph.edges).enter().append('line').attr('class', 'link');
+  link.append('title').text(function(d) {return d.label;})
 
   var node = svg.selectAll("circle.node")
       .data(currentGraph.nodes)
@@ -84,7 +85,21 @@ function initGraph() {
       .attr("r", d3Config.nodeSize)
       .style("fill", function(d) { return d3Config.color(d.typeGroup); })
       .call(force.drag);
-  node.on('click', function(d, i) {selectedContainer.innerText = JSON.stringify(d, null, 2)})
+  node.on('click', function(d, i) {selectedContainer.innerText = JSON.stringify(d, null, 2); }) // If they're holding shift, release
+
+  // Fix on click/drag, unfix on double click
+  force.drag().on('dragstart', function(d, i) { d.fixed = true });
+
+  // Right click will greatly dim the node and associated edges
+  node.on('contextmenu', function(d) {
+    if(d.dimmed) {
+      d.dimmed = false;
+      d.attr("class", "node");
+    } else {
+      d.dimmed = true;
+      d.attr("class", "node dimmed");
+    }
+  })
 
   var anchorNode = svg.selectAll("g.anchorNode").data(labelForce.nodes()).enter().append("svg:g").attr("class", "anchorNode");
   anchorNode.append("svg:circle").attr("r", 0).style("fill", "#FFF");
@@ -173,7 +188,7 @@ function buildNodes(package) {
 
 function titleFor(tlo) {
   if(tlo.type === 'relationship') {
-    return "rel: " + (tlo.value || d.relationship_nature);
+    return "rel: " + (tlo.kind_of_relationship);
   } else if (tlo.title !== undefined) {
     return tlo.title;
   } else {
