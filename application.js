@@ -1,3 +1,7 @@
+// Copyright (c) 2016, The MITRE Corporation. All rights reserved.
+// See LICENSE.txt for complete terms.
+
+
 // Config
 var d3Config = {
   color: d3.scale.category20(),
@@ -11,9 +15,8 @@ uploader = document.getElementById('uploader');
 canvasContainer = document.getElementById('canvas-container');
 canvas = document.getElementById('canvas');
 styles = window.getComputedStyle(uploader);
-width = parseInt(styles.width) - 350;
-height = parseInt(styles.height);
-
+width = 900;// parseInt(styles.width) - 350;
+height = 450;// parseInt(styles.height);
 canvas.style.width = width;
 canvas.style.height = height;
 
