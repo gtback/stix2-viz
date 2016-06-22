@@ -62,8 +62,10 @@ h1 {
 h2 {
   font-weight: 200;
 }
-
-.link {
+/*
+ * This is not getting attatched to the lines for some reason...
+ */
+line, .link {
   stroke-width: 5;
   stroke: #aaa;
 }

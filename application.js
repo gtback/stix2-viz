@@ -78,7 +78,13 @@ function initGraph() {
   force.nodes(currentGraph.nodes).links(currentGraph.edges).start();
   labelForce.nodes(labelGraph.nodes).links(labelGraph.edges).start();
 
-  var link = svg.selectAll('line.link').data(currentGraph.edges).enter().append('line').attr('class', 'link');
+  
+  // Adds style directly because it wasn't getting picked up by the style sheet
+  var link = svg.selectAll('line.link').data(currentGraph.edges).enter().append('line')
+      .attr('class', 'link')
+      .style("stroke", "#aaa")
+      .style("stroke-width", "1px");
+
   link.append('title').text(function(d) {return d.label;})
 
   var node = svg.selectAll("circle.node")
