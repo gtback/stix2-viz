@@ -21,7 +21,9 @@ canvas.style.width = width;
 canvas.style.height = height;
 
 refRegex = /_ref$/;
-var force = d3.layout.force().charge(-120).linkDistance(d3Config.linkMultiplier * d3Config.nodeSize).size([width, height]);
+// Determines the "float and repel" behavior of the nodes
+var force = d3.layout.force().charge(-400).linkDistance(d3Config.linkMultiplier * d3Config.nodeSize).size([width, height]);
+// Determines the "float and repel" behavior of the text labels
 var labelForce = d3.layout.force().gravity(0).linkDistance(25).linkStrength(8).charge(-120).size([width, height]);
 var svg = d3.select('svg');
 var typeGroups = {};
@@ -31,7 +33,6 @@ var currentGraph = {
   nodes: [],
   edges: []
 }
-
 var labelGraph = {
   nodes: [],
   edges: []
@@ -39,23 +40,25 @@ var labelGraph = {
 
 var idCache = {};
 
+/* ******************************************************
+ * This group of functions is for handling file "upload."
+ * They take an event as input and parse the file on the
+ * front end.
+ * ******************************************************/
 function handleFileSelect(evt) {
   handleFiles(evt.target.files);
 }
-
 function handleFileDrop(evt) {
   evt.stopPropagation();
   evt.preventDefault();
 
   handleFiles(evt.dataTransfer.files);
 }
-
 function handleDragOver(evt) {
   evt.stopPropagation();
   evt.preventDefault();
   evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
 }
-
 function handleFiles(files) {
   // files is a FileList of File objects (in our case, just one)
   var output = [];
@@ -68,12 +71,16 @@ function handleFiles(files) {
     r.readAsText(f);
   }
 }
+/* ---------------------------------------------------- */
 
 function addToGraph(package) {
-  buildNodes(package);
-  initGraph();
+  buildNodes(package); // It looks like this one actually sets all of the variables
+  initGraph(); // This one takes the variables set above and builds the svg presentation
 }
 
+/* ******************************************************
+ * Generates the components on the chart from the JSON data
+ * ******************************************************/
 function initGraph() {
   force.nodes(currentGraph.nodes).links(currentGraph.edges).start();
   labelForce.nodes(labelGraph.nodes).links(labelGraph.edges).start();
@@ -84,7 +91,7 @@ function initGraph() {
       .attr('class', 'link')
       .style("stroke", "#aaa")
       .style("stroke-width", "1px");
-
+  // Add the text labels to the links
   link.append('title').text(function(d) {return d.label;})
 
   var node = svg.selectAll("circle.node")
@@ -92,17 +99,19 @@ function initGraph() {
     .enter().append("circle")
       .attr("class", "node")
       .attr("r", d3Config.nodeSize)
-      .style("fill", function(d) { return d3Config.color(d.typeGroup); })
-      .call(force.drag);
+      .style("fill", function(d) { return d3Config.color(d.typeGroup); }) // <-- Where is the typeGroup color determined?
+      .call(force.drag); // <-- What does the "call()" function do?
   node.on('click', function(d, i) {selectedContainer.innerText = JSON.stringify(d, null, 2); }) // If they're holding shift, release
 
   // Fix on click/drag, unfix on double click
+  // >>>>>>> Currently broken! Double-click does not work. <<<<<<<<
   force.drag().on('dragstart', function(d, i) { d.fixed = true });
 
   // Right click will greatly dim the node and associated edges
+  // >>>>>>> Does not currently work <<<<<<<
   node.on('contextmenu', function(d) {
     if(d.dimmed) {
-      d.dimmed = false;
+      d.dimmed = false; // <-- What is this? Where is this set? How does this work?
       d.attr("class", "node");
     } else {
       d.dimmed = true;
@@ -153,6 +162,10 @@ function initGraph() {
   });
 }
 
+/* ******************************************************
+ * Sets parses the JSON input and builds the arrays used 
+ * by initGraph()
+ * ******************************************************/
 function buildNodes(package) {
   var tempEdges = [];
   // Iterate through each key on the package. If it's an array, assume every item is a TLO.
@@ -195,9 +208,12 @@ function buildNodes(package) {
   });
 }
 
+/* ******************************************************
+ * Adds a title to a TLO Node
+ * ******************************************************/
 function titleFor(tlo) {
   if(tlo.type === 'relationship') {
-    return "rel: " + (tlo.kind_of_relationship);
+    return "rel: " + (tlo.value);// (tlo.kind_of_relationship); // <-- This is where the error comes from on relationship nodes
   } else if (tlo.title !== undefined) {
     return tlo.title;
   } else {
@@ -205,6 +221,12 @@ function titleFor(tlo) {
   }
 }
 
+/* ******************************************************
+ * Adds a TLO
+ * TODO:
+ *   - Document what gets passed in here
+ *   - Document what gets affected
+ * ******************************************************/
 function addTlo(tlo, tempEdges) {
   if(idCache[tlo.id]) {
     console.log("Already added, skipping!", tlo)
