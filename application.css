@@ -24,6 +24,10 @@ h1 {
   right: 0;
 }
 
+svg {
+  border: solid 1px black;
+}
+
 #uploader {
   text-align: center;
   line-height: 1;
@@ -57,6 +61,11 @@ h1 {
   margin-top: 25px;
   padding: 25px;
   background-color: #fafafa;
+}
+
+#pasted {
+  height: 100px;
+  width: 200px;
 }
 
 h2 {
