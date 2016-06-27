@@ -73,8 +73,7 @@ function handleFiles(files) {
 /* ---------------------------------------------------- */
 
 /* ******************************************************
- * Handles JSON pasted to the text area. Throws an alert
- * when JSON cannot be parsed correctly.
+ * Handles content pasted to the text area.
  * ******************************************************/
 function handleTextarea() {
   content = document.getElementById('paste-area').value;
@@ -82,10 +81,21 @@ function handleTextarea() {
 }
 
 /* ******************************************************
- * Takes a string as input and attempts to build and 
- * display the graph from that string. If parsing the
- * string does not produce valid JSON, fails gracefully
- * and alerts the user.
+ * Fetches STIX 2.0 data from an external URL (supplied
+ * user) via AJAX. Server-side Access-Control-Allow-Origin
+ * must allow cross-domain requests for this to work.
+ * ******************************************************/
+function handleFetchJson() {
+  var url = document.getElementById("url").value;
+  fetchJsonAjax(url, handlePackage);
+}
+
+/* ******************************************************
+ * Attempts to build and display the graph from an
+ * arbitrary input string. If parsing the string does not
+ * produce valid JSON, fails gracefully and alerts the user.
+ * 
+ * Takes a string as input.
  * ******************************************************/
 function handlePackage(package) {
   try {
@@ -188,7 +198,9 @@ function initGraph() {
 
 /* ******************************************************
  * Sets parses the JSON input and builds the arrays used 
- * by initGraph()
+ * by initGraph().
+ * 
+ * Takes a JSON object as input.
  * ******************************************************/
 function buildNodes(package) {
   var tempEdges = [];
@@ -287,31 +299,23 @@ function hideMessages() {
   canvasContainer.style.display = "block";
 }
 
-function handleFetchJson() {
-  var url = document.getElementById("url").value;
-  console.log("URL: " + url);
-  fetchJsonAjax(url);
-}
-
 /* ******************************************************
- * Fetches STIX 2.0 data from an external URL via AJAX.
- * Server-side Access-Control-Allow-Origin must allow for
- * cross-domain requests for this to work.
+ * Generic AJAX 'GET' request.
+ * 
+ * Takes a URL and a callback function as input.
  * ******************************************************/
-function fetchJsonAjax(url) {
+function fetchJsonAjax(url, cfunc) {
   var xhttp;
   if (window.XMLHttpRequest) {
     xhttp = new XMLHttpRequest();
   } else {
     xhttp = new ActiveXObject("Microsoft.XMLHTTP"); // For IE5 and IE6 luddites
   }
-
   xhttp.onreadystatechange = function() {
     if (xhttp.readyState == 4 && xhttp.status == 200) {
-      handlePackage(xhttp.responseText)
+      cfunc(xhttp.responseText);
     }
   }
-
   xhttp.open("GET", url, true);
   xhttp.send();
 }
