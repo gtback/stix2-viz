@@ -293,6 +293,11 @@ function handleFetchJson() {
   fetchJsonAjax(url);
 }
 
+/* ******************************************************
+ * Fetches STIX 2.0 data from an external URL via AJAX.
+ * Server-side Access-Control-Allow-Origin must allow for
+ * cross-domain requests for this to work.
+ * ******************************************************/
 function fetchJsonAjax(url) {
   var xhttp;
   if (window.XMLHttpRequest) {
@@ -303,7 +308,7 @@ function fetchJsonAjax(url) {
 
   xhttp.onreadystatechange = function() {
     if (xhttp.readyState == 4 && xhttp.status == 200) {
-      console.log(xhttp.responseText);
+      handlePackage(xhttp.responseText)
     }
   }
 
