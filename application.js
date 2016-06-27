@@ -276,8 +276,33 @@ function hideMessages() {
   canvasContainer.style.display = "block";
 }
 
+function handleFetchJson() {
+  var url = document.getElementById("url").value;
+  console.log("URL: " + url);
+  fetchJsonAjax(url);
+}
+
+function fetchJsonAjax(url) {
+  var xhttp;
+  if (window.XMLHttpRequest) {
+    xhttp = new XMLHttpRequest();
+  } else {
+    xhttp = new ActiveXObject("Microsoft.XMLHTTP"); // For IE5 and IE6 luddites
+  }
+
+  xhttp.onreadystatechange = function() {
+    if (xhttp.readyState == 4 && xhttp.status == 200) {
+      console.log(xhttp.responseText);
+    }
+  }
+
+  xhttp.open("GET", url, true);
+  xhttp.send();
+}
+
 // Bind our events!
 document.getElementById('files').addEventListener('change', handleFileSelect, false);
 document.getElementById('paste-parser').addEventListener('click', handleTextarea, false);
+document.getElementById('fetch-url').addEventListener('click', handleFetchJson, false);
 uploader.addEventListener('dragover', handleDragOver, false);
 uploader.addEventListener('drop', handleFileDrop, false);
