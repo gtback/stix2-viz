@@ -63,9 +63,9 @@ svg {
   background-color: #fafafa;
 }
 
-#pasted {
-  height: 100px;
-  width: 200px;
+#paste-area {
+  height: 25em;
+  width: 40em;
 }
 
 h2 {

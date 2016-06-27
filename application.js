@@ -61,7 +61,6 @@ function handleDragOver(evt) {
 }
 function handleFiles(files) {
   // files is a FileList of File objects (in our case, just one)
-  var output = [];
   for (var i = 0, f; f = files[i]; i++) {
     document.getElementById('chosen-files').innerText += f.name + " ";
     hideMessages();
@@ -72,6 +71,20 @@ function handleFiles(files) {
   }
 }
 /* ---------------------------------------------------- */
+
+/* ******************************************************
+ * Handles JSON pasted to the text area. Throws an alert
+ * when JSON cannot be parsed correctly.
+ * ******************************************************/
+function handleTextarea() {
+  content = document.getElementById('paste-area').value;
+  try { 
+    hideMessages();
+    addToGraph(JSON.parse(content));
+  } catch (err) {
+    alert("Something went wrong!\n\nError:\n" + err);
+  }
+}
 
 function addToGraph(package) {
   buildNodes(package); // It looks like this one actually sets all of the variables
@@ -265,5 +278,6 @@ function hideMessages() {
 
 // Bind our events!
 document.getElementById('files').addEventListener('change', handleFileSelect, false);
+document.getElementById('paste-parser').addEventListener('click', handleTextarea, false);
 uploader.addEventListener('dragover', handleDragOver, false);
 uploader.addEventListener('drop', handleFileDrop, false);
