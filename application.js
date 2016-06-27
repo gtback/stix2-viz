@@ -78,9 +78,20 @@ function handleFiles(files) {
  * ******************************************************/
 function handleTextarea() {
   content = document.getElementById('paste-area').value;
-  try { 
+  handlePackage(content);
+}
+
+/* ******************************************************
+ * Takes a string as input and attempts to build and 
+ * display the graph from that string. If parsing the
+ * string does not produce valid JSON, fails gracefully
+ * and alerts the user.
+ * ******************************************************/
+function handlePackage(package) {
+  try {
+    var parsed = JSON.parse(package); // Saving this to a variable stops tbe rest of the function from executing on parse failure
     hideMessages();
-    addToGraph(JSON.parse(content));
+    addToGraph(parsed);
   } catch (err) {
     alert("Something went wrong!\n\nError:\n" + err);
   }
