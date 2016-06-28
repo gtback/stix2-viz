@@ -300,10 +300,14 @@ function hideMessages() {
 }
 
 /* ******************************************************
- * Screens out D3 chart data from the presentation
+ * Screens out D3 chart data from the presentation.
+ * Called as the 2nd parameter to JSON.stringify().
  * ******************************************************/
 function replacer(key, value) {
-  if (typeof value === "number") {
+  // Array of D3-added attributes we want screened out of the presentation
+  var blacklist = ["typeGroup", "index", "weight", "x", "y", "px", "py", "fixed"];
+  
+  if (blacklist.indexOf(key) >= 0) {
     return undefined;
   }
   return value;
