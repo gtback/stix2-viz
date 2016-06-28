@@ -135,7 +135,7 @@ function initGraph() {
       .attr("r", d3Config.nodeSize)
       .style("fill", function(d) { return d3Config.color(d.typeGroup); }) // <-- Where is the typeGroup color determined?
       .call(force.drag); // <-- What does the "call()" function do?
-  node.on('click', function(d, i) {selectedContainer.innerText = JSON.stringify(d, null, 2); }) // If they're holding shift, release
+  node.on('click', function(d, i) {selectedContainer.innerText = JSON.stringify(d, replacer, 2); }) // If they're holding shift, release
 
   // Fix on click/drag, unfix on double click
   // >>>>>>> Currently broken! Double-click does not work. <<<<<<<<
@@ -297,6 +297,16 @@ function addTlo(tlo, tempEdges) {
 function hideMessages() {
   uploader.style.display = "none";
   canvasContainer.style.display = "block";
+}
+
+/* ******************************************************
+ * Screens out D3 chart data from the presentation
+ * ******************************************************/
+function replacer(key, value) {
+  if (typeof value === "number") {
+    return undefined;
+  }
+  return value;
 }
 
 /* ******************************************************
