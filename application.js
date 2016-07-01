@@ -21,6 +21,7 @@ canvas.style.width = width;
 canvas.style.height = height;
 
 refRegex = /_ref$/;
+relationshipsKeyRegex = /(r|R)elationships/; // Added by Matt
 // Determines the "float and repel" behavior of the nodes
 var force = d3.layout.force().charge(-400).linkDistance(d3Config.linkMultiplier * d3Config.nodeSize).size([width, height]);
 // Determines the "float and repel" behavior of the text labels
@@ -112,9 +113,11 @@ function addToGraph(package) {
   initGraph(); // This one takes the variables set above and builds the svg presentation
 }
 
-function swapFixed(d, i) {
-  console.log(d.fixed);
-  d.fixed = true;
+function displayRelationship(d, i) {
+  //console.log(d.source);
+  //console.log(d.target);
+  console.log(currentGraph);
+  console.log(labelGraph);
 }
 
 /* ******************************************************
@@ -129,9 +132,17 @@ function initGraph() {
   var link = svg.selectAll('line.link').data(currentGraph.edges).enter().append('line')
       .attr('class', 'link')
       .style("stroke", "#aaa")
-      .style("stroke-width", "1px");
+      .style("stroke-width", "3px");
   // Add the text labels to the links
   link.append('title').text(function(d) {return d.label;})
+
+
+
+  // The callback function here is going to be the KEY TO ER'THANG
+  link.on('click', function(d, i) { selectedContainer.innerText = JSON.stringify(d, replacer, 2); }) // displayRelationship(d, i) });
+
+
+
 
   var node = svg.selectAll("circle.node")
       .data(currentGraph.nodes)
@@ -207,30 +218,54 @@ function initGraph() {
 }
 
 /* ******************************************************
- * Sets parses the JSON input and builds the arrays used 
- * by initGraph().
+ * Parses the JSON input and builds the arrays used by
+ * initGraph().
  * 
  * Takes a JSON object as input.
  * ******************************************************/
 function buildNodes(package) {
   var tempEdges = [];
+  var relationships = [];
   // Iterate through each key on the package. If it's an array, assume every item is a TLO.
   Object.keys(package).forEach(function(key) {
     if(package[key].constructor === Array) {
-      var container = package[key];
-      for(var i = 0; i < container.length; i++) {
-        // So, in theory, each of these should be a TLO. To be sure, we'll check to make sure it has an `id` and `type`. If not, raise an error and ignore it.
-        var maybeTlo = container[i];
-        if(maybeTlo.id === undefined || maybeTlo.type === undefined) {
-          console.error("Should this be a TLO???", maybeTlo)
-        } else {
-          addTlo(maybeTlo, tempEdges);
+      /////////////////////////////////////////////////////
+      ////////////    CONSTRUCTION ZONE    ////////////////
+      if (relationshipsKeyRegex.exec(key)) {
+        // do stuff
+        relationships = package[key];
+        console.log(relationships.length);
+      } else {
+          // This junk was originally one level up. The nested if did not exist
+          var container = package[key];
+          for(var i = 0; i < container.length; i++) {
+          // So, in theory, each of these should be a TLO. To be sure, we'll check to make sure it has an `id` and `type`. If not, raise an error and ignore it.
+          var maybeTlo = container[i];
+          if(maybeTlo.id === undefined || maybeTlo.type === undefined) {
+            console.error("Should this be a TLO???", maybeTlo)
+          } else {
+            addTlo(maybeTlo, tempEdges);
+          }
         }
+      //////////////////////////////////////////////////////
       }
     }
   });
 
-  // Now, go back through the edges and fix the "to" to point to the actual index, then add it to the official edges list
+  /////////////////////////////////////////////////////
+  ////////////    CONSTRUCTION ZONE    ////////////////
+  for(var i = 0; i < relationships.length; i++) {
+    var rel = relationships[i];
+    if(idCache[rel.source_ref] === null || idCache[rel.source_ref] === undefined) {
+      console.error("Couldn't find source!", rel);
+    } else if (idCache[rel.target_ref] === null || idCache[rel.target_ref] === undefined) {
+      console.error("Couldn't find target!", rel);
+    } else {
+      currentGraph.edges.push({source: idCache[rel.source_ref], target: idCache[rel.target_ref], label: rel.value});
+    }
+  }
+
+  /* Now, go back through the edges and fix the "to" to point to the actual index, then add it to the official edges list
   for(var i = 0; i < tempEdges.length; i++) {
     var tempEdge = tempEdges[i];
     if(idCache[tempEdge.to] === null || idCache[tempEdge.to] === undefined) {
@@ -238,7 +273,8 @@ function buildNodes(package) {
     } else {
       currentGraph.edges.push({source: tempEdge.from, target: idCache[tempEdge.to], label: tempEdge.label});
     }
-  }
+  }*/
+  ////////////////////////////////////////////////////
 
   // Add the legend so we know what's what
   var ul = document.getElementById('legend-content');
@@ -295,12 +331,14 @@ function addTlo(tlo, tempEdges) {
 		});
 
     // Now, look for edges...any property ending in "_ref"
-    Object.keys(tlo).forEach(function(key) {
-      if(refRegex.exec(key)) {
+    // MATT: But this creates a separate edge for both the source and target _ref.
+    //   shouldn't they ideally just be two endpoints of the same edge?
+    //Object.keys(tlo).forEach(function(key) {
+    //  if(refRegex.exec(key)) {
         // Add a temporary edge pointing to the ID...this is because some references will refer to things we haven't added yet, and therefore for which we won't know the index
-        tempEdges.push({from: idCache[tlo.id], to: tlo[key], label: key})
-      }
-    });
+    //    tempEdges.push({from: idCache[tlo.id], to: tlo[key], label: key})
+    //  }
+    //});
   }
 }
 
