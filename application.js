@@ -100,7 +100,7 @@ function handleFetchJson() {
  * ******************************************************/
 function handlePackage(package) {
   try {
-    var parsed = JSON.parse(package); // Saving this to a variable stops tbe rest of the function from executing on parse failure
+    var parsed = JSON.parse(package); // Saving this to a variable stops the rest of the function from executing on parse failure
     hideMessages();
     addToGraph(parsed);
   } catch (err) {
@@ -109,15 +109,8 @@ function handlePackage(package) {
 }
 
 function addToGraph(package) {
-  buildNodes(package); // It looks like this one actually sets all of the variables
-  initGraph(); // This one takes the variables set above and builds the svg presentation
-}
-
-function displayRelationship(d, i) {
-  //console.log(d.source);
-  //console.log(d.target);
-  console.log(currentGraph);
-  console.log(labelGraph);
+  buildNodes(package);
+  initGraph();
 }
 
 /* ******************************************************
@@ -127,7 +120,6 @@ function initGraph() {
   force.nodes(currentGraph.nodes).links(currentGraph.edges).start();
   labelForce.nodes(labelGraph.nodes).links(labelGraph.edges).start();
 
-  
   // Adds style directly because it wasn't getting picked up by the style sheet
   var link = svg.selectAll('line.link').data(currentGraph.edges).enter().append('line')
       .attr('class', 'link')
@@ -135,14 +127,7 @@ function initGraph() {
       .style("stroke-width", "3px");
   // Add the text labels to the links
   link.append('title').text(function(d) {return d.label;})
-
-
-
-  // The callback function here is going to be the KEY TO ER'THANG
-  link.on('click', function(d, i) { selectedContainer.innerText = JSON.stringify(d, replacer, 2); }) // displayRelationship(d, i) });
-
-
-
+  link.on('click', function(d, i) { selectedContainer.innerText = JSON.stringify(d, replacer, 2); });
 
   var node = svg.selectAll("circle.node")
       .data(currentGraph.nodes)
@@ -247,33 +232,11 @@ function buildNodes(package) {
             addTlo(maybeTlo, tempEdges);
           }
         }
-      //////////////////////////////////////////////////////
       }
     }
   });
 
-  /////////////////////////////////////////////////////
-  ////////////    CONSTRUCTION ZONE    ////////////////
-  for(var i = 0; i < relationships.length; i++) {
-    var rel = relationships[i];
-    if(idCache[rel.source_ref] === null || idCache[rel.source_ref] === undefined) {
-      console.error("Couldn't find source!", rel);
-    } else if (idCache[rel.target_ref] === null || idCache[rel.target_ref] === undefined) {
-      console.error("Couldn't find target!", rel);
-    } else {
-      currentGraph.edges.push({source: idCache[rel.source_ref], target: idCache[rel.target_ref], label: rel.value});
-    }
-  }
-
-  /* Now, go back through the edges and fix the "to" to point to the actual index, then add it to the official edges list
-  for(var i = 0; i < tempEdges.length; i++) {
-    var tempEdge = tempEdges[i];
-    if(idCache[tempEdge.to] === null || idCache[tempEdge.to] === undefined) {
-      console.error("Couldn't find target!", tempEdge);
-    } else {
-      currentGraph.edges.push({source: tempEdge.from, target: idCache[tempEdge.to], label: tempEdge.label});
-    }
-  }*/
+  addRelationships(relationships);
   ////////////////////////////////////////////////////
 
   // Add the legend so we know what's what
@@ -342,6 +305,29 @@ function addTlo(tlo, tempEdges) {
   }
 }
 
+/* ******************************************************
+ * Adds relationships to the graph based on the array of
+ * relationships contained in the data.
+ * 
+ * Takes an array as input.
+ * ******************************************************/
+function addRelationships(relationships) {
+  for(var i = 0; i < relationships.length; i++) {
+    var rel = relationships[i];
+    if(idCache[rel.source_ref] === null || idCache[rel.source_ref] === undefined) {
+      console.error("Couldn't find source!", rel);
+    } else if (idCache[rel.target_ref] === null || idCache[rel.target_ref] === undefined) {
+      console.error("Couldn't find target!", rel);
+    } else {
+      currentGraph.edges.push({source: idCache[rel.source_ref], target: idCache[rel.target_ref], label: rel.value});
+    }
+  }
+}
+
+/* ******************************************************
+ * Hides the data entry container and displays the graph
+ * container
+ * ******************************************************/
 function hideMessages() {
   uploader.style.display = "none";
   canvasContainer.style.display = "block";
@@ -352,9 +338,7 @@ function hideMessages() {
  * Called as the 2nd parameter to JSON.stringify().
  * ******************************************************/
 function replacer(key, value) {
-  // Array of D3-added attributes we want screened out of the presentation
   var blacklist = ["typeGroup", "index", "weight", "x", "y", "px", "py", "fixed"];
-  
   if (blacklist.indexOf(key) >= 0) {
     return undefined;
   }
