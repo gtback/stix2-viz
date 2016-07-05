@@ -120,13 +120,31 @@ function initGraph() {
   force.nodes(currentGraph.nodes).links(currentGraph.edges).start();
   labelForce.nodes(labelGraph.nodes).links(labelGraph.edges).start();
 
+  // build the arrow.
+  // (Only builds one arrow which is then referenced by the marker-end
+  // attribute of the lines)
+  // code shamelessly cribbed from: http://stackoverflow.com/questions/28050434/introducing-arrowdirected-in-force-directed-graph-d3
+  svg.append("svg:defs").selectAll("marker")
+      .data(["end"])      // Different link/path types can be defined here
+    .enter().append("svg:marker")    // This section adds in the arrows
+      .attr("id", String)
+      .attr("viewBox", "0 -5 10 10")
+      .attr("refX", 15)
+      .attr("refY", 0)
+      .attr("markerWidth", 6)
+      .attr("markerHeight", 6)
+      .attr("orient", "auto")
+    .append("svg:path")
+      .attr("d", "M0,-5L10,0L0,5");
+
   // Adds style directly because it wasn't getting picked up by the style sheet
   var link = svg.selectAll('line.link').data(currentGraph.edges).enter().append('line')
       .attr('class', 'link')
       .style("stroke", "#aaa")
-      .style("stroke-width", "3px");
+      .style("stroke-width", "3px")
+      .attr("marker-end", "url(#end)"); // Add the arrow to the end of the link
   // Add the text labels to the links
-  link.append('title').text(function(d) {return d.label;})
+  link.append('title').text(function(d) {return d.label;});
   link.on('click', function(d, i) { selectedContainer.innerText = JSON.stringify(d, replacer, 2); });
 
   var node = svg.selectAll("circle.node")
@@ -209,35 +227,19 @@ function initGraph() {
  * Takes a JSON object as input.
  * ******************************************************/
 function buildNodes(package) {
-  var tempEdges = [];
   var relationships = [];
   // Iterate through each key on the package. If it's an array, assume every item is a TLO.
   Object.keys(package).forEach(function(key) {
     if(package[key].constructor === Array) {
-      /////////////////////////////////////////////////////
-      ////////////    CONSTRUCTION ZONE    ////////////////
-      if (relationshipsKeyRegex.exec(key)) {
-        // do stuff
-        relationships = package[key];
-        console.log(relationships.length);
+      if (!(relationshipsKeyRegex.exec(key))) { // Relationships are NOT ordinary TLOs
+        parseTLOs(package[key]);
       } else {
-          // This junk was originally one level up. The nested if did not exist
-          var container = package[key];
-          for(var i = 0; i < container.length; i++) {
-          // So, in theory, each of these should be a TLO. To be sure, we'll check to make sure it has an `id` and `type`. If not, raise an error and ignore it.
-          var maybeTlo = container[i];
-          if(maybeTlo.id === undefined || maybeTlo.type === undefined) {
-            console.error("Should this be a TLO???", maybeTlo)
-          } else {
-            addTlo(maybeTlo, tempEdges);
-          }
-        }
+        relationships = package[key];
       }
     }
   });
 
   addRelationships(relationships);
-  ////////////////////////////////////////////////////
 
   // Add the legend so we know what's what
   var ul = document.getElementById('legend-content');
@@ -258,7 +260,7 @@ function buildNodes(package) {
  * ******************************************************/
 function titleFor(tlo) {
   if(tlo.type === 'relationship') {
-    return "rel: " + (tlo.value);// (tlo.kind_of_relationship); // <-- This is where the error comes from on relationship nodes
+    return "rel: " + (tlo.value);
   } else if (tlo.title !== undefined) {
     return tlo.title;
   } else {
@@ -267,12 +269,30 @@ function titleFor(tlo) {
 }
 
 /* ******************************************************
- * Adds a TLO
- * TODO:
- *   - Document what gets passed in here
- *   - Document what gets affected
+ * Parses valid TLOs from an array of potential TLO
+ * objects (ideally from the data object)
+ * 
+ * Takes an array of objects as input.
  * ******************************************************/
-function addTlo(tlo, tempEdges) {
+function parseTLOs(container) {
+  var cap = container.length;
+  for(var i = 0; i < cap; i++) {
+    // So, in theory, each of these should be a TLO. To be sure, we'll check to make sure it has an `id` and `type`. If not, raise an error and ignore it.
+    var maybeTlo = container[i];
+    if(maybeTlo.id === undefined || maybeTlo.type === undefined) {
+      console.error("Should this be a TLO???", maybeTlo)
+    } else {
+      addTlo(maybeTlo);
+    }
+  }
+}
+
+/* ******************************************************
+ * Adds a TLO node to the graph
+ * 
+ * Takes a valid TLO object as input.
+ * ******************************************************/
+function addTlo(tlo) {
   if(idCache[tlo.id]) {
     console.log("Already added, skipping!", tlo)
   } else {
@@ -292,16 +312,6 @@ function addTlo(tlo, tempEdges) {
 			target : (labelGraph.nodes.length - 1),
       weight: 1
 		});
-
-    // Now, look for edges...any property ending in "_ref"
-    // MATT: But this creates a separate edge for both the source and target _ref.
-    //   shouldn't they ideally just be two endpoints of the same edge?
-    //Object.keys(tlo).forEach(function(key) {
-    //  if(refRegex.exec(key)) {
-        // Add a temporary edge pointing to the ID...this is because some references will refer to things we haven't added yet, and therefore for which we won't know the index
-    //    tempEdges.push({from: idCache[tlo.id], to: tlo[key], label: key})
-    //  }
-    //});
   }
 }
 
