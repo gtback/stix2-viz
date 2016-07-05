@@ -154,7 +154,11 @@ function initGraph() {
       .attr("r", d3Config.nodeSize)
       .style("fill", function(d) { return d3Config.color(d.typeGroup); })
       .call(force.drag); // <-- What does the "call()" function do?
-  node.on('click', function(d, i) {selectedContainer.innerText = JSON.stringify(d, replacer, 2); }) // If they're holding shift, release
+  node.on('click', function(d, i) {
+    selectedContainer.innerText = JSON.stringify(d, replacer, 2);
+    d3.select('.selected').classed('selected', false);
+    d3.select(this).classed('selected', true);
+  }); // If they're holding shift, release
 
   // Fix on click/drag, unfix on double click
   // Ideally, we could break this out into a function that
@@ -162,8 +166,8 @@ function initGraph() {
   // function of force.drag().on() thinks d.fixed is a number
   // even when it has been previously set as a boolean.
   // I don't know, man. Javascript.
-  force.drag().on('dragstart', function(d, i) { d.fixed = true });
-  node.on('dblclick', function(d, i) { d.fixed = false });
+  force.drag().on('dragstart', function(d, i) { handlePin(d, this, true) });//d.fixed = true });
+  node.on('dblclick', function(d, i) { handlePin(d, this, false) });//d.fixed = false });
 
   // Right click will greatly dim the node and associated edges
   // >>>>>>> Does not currently work <<<<<<<
@@ -218,6 +222,17 @@ function initGraph() {
 			});
 		});
   });
+}
+
+function handlePin(d, el, pinBool) {
+  d.fixed = pinBool;
+  //console.log(node);
+  d3.select(el).classed("pinned", pinBool);
+  // if (pinBool) {
+  //   node.classed("pinned", );
+  // } else {
+  //   node.classList.remove("pinned");
+  // }
 }
 
 /* ******************************************************

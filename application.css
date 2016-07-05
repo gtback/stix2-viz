@@ -109,3 +109,13 @@ pre {
 .dimmed {
   opacity: 0.9;
 }
+
+.pinned {
+  stroke: black;
+  stroke-width: 2;
+}
+
+.selected {
+  stroke: black;
+  stroke-width: 4;
+}
