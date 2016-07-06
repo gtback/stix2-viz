@@ -150,7 +150,7 @@ function initGraph() {
       .attr("marker-end", "url(#end)"); // Add the arrow to the end of the link
   // Add the text labels to the links
   link.append('title').text(function(d) {return d.label;});
-  link.on('click', function(d, i) { selectedContainer.innerText = JSON.stringify(d, replacer, 2); });
+  link.on('click', function(d, i) { handleSelected(d, this) });
 
   var node = svg.selectAll("circle.node")
       .data(currentGraph.nodes)
@@ -159,11 +159,7 @@ function initGraph() {
       .attr("r", d3Config.nodeSize)
       .style("fill", function(d) { return d3Config.color(d.typeGroup); })
       .call(force.drag); // <-- What does the "call()" function do?
-  node.on('click', function(d, i) {
-    selectedContainer.innerText = JSON.stringify(d, replacer, 2);
-    d3.select('.selected').classed('selected', false);
-    d3.select(this).classed('selected', true);
-  }); // If they're holding shift, release
+  node.on('click', function(d, i) { handleSelected(d, this) }); // If they're holding shift, release
 
   // Fix on click/drag, unfix on double click
   // Ideally, we could break this out into a function that
@@ -227,6 +223,12 @@ function initGraph() {
 			});
 		});
   });
+}
+
+function handleSelected(d, el) {
+  selectedContainer.innerText = JSON.stringify(d, replacer, 2);
+  d3.select('.selected').classed('selected', false);
+   d3.select(el).classed('selected', true);
 }
 
 /* ******************************************************
