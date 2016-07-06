@@ -23,7 +23,7 @@ canvas.style.width = width;
 canvas.style.height = height;
 
 refRegex = /_ref$/;
-relationshipsKeyRegex = /(r|R)elationships/; // Added by Matt
+relationshipsKeyRegex = /(r|R)elationships?/; // Added by Matt
 // Determines the "float and repel" behavior of the nodes
 var force = d3.layout.force().charge(-400).linkDistance(d3Config.linkMultiplier * d3Config.nodeSize).size([width, height]);
 // Determines the "float and repel" behavior of the text labels
@@ -388,15 +388,29 @@ function addTlo(tlo) {
  * Takes an array as input.
  * ******************************************************/
 function addRelationships(relationships) {
+  //var relCache = [];
   for(var i = 0; i < relationships.length; i++) {
     var rel = relationships[i];
+    //var package = {};
     if(idCache[rel.source_ref] === null || idCache[rel.source_ref] === undefined) {
-      console.error("Couldn't find source!", rel);
+      if (relationshipsKeyRegex.exec(rel.source_ref)) {
+        console.log("Yo dawg yo source be a relationship");
+        // ...OK, so now what?
+      } else {
+        console.error("Couldn't find source!", rel);
+      }
     } else if (idCache[rel.target_ref] === null || idCache[rel.target_ref] === undefined) {
-      console.error("Couldn't find target!", rel);
+      if (relationshipsKeyRegex.exec(rel.target_ref)) {
+        console.log("Yo dawg yo target be a relationship");
+        //package = 
+      } else {
+        console.error("Couldn't find target!", rel);
+      }
     } else {
+      //package = {source: idCache[rel.source_ref], target: idCache[rel.target_ref], label: rel.value}
       currentGraph.edges.push({source: idCache[rel.source_ref], target: idCache[rel.target_ref], label: rel.value});
     }
+    //currentGraph.edges.push(package);
   }
 }
 
