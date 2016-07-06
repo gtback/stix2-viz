@@ -116,6 +116,7 @@ pre {
 }
 
 .selected {
-  stroke: black;
-  stroke-width: 4;
+  /*stroke: black;
+  stroke-width: 4;*/
+  filter: url(#drop-shadow);
 }

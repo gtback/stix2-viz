@@ -10,6 +10,8 @@ var d3Config = {
 }
 
 // Init some stuff
+// MATT: For optimization purposes, I might look into moving these to
+// local variables
 selectedContainer = document.getElementById('selection');
 uploader = document.getElementById('uploader');
 canvasContainer = document.getElementById('canvas-container');
@@ -124,7 +126,8 @@ function initGraph() {
   // (Only builds one arrow which is then referenced by the marker-end
   // attribute of the lines)
   // code shamelessly cribbed from: http://stackoverflow.com/questions/28050434/introducing-arrowdirected-in-force-directed-graph-d3
-  svg.append("svg:defs").selectAll("marker")
+  var defs = svg.append("svg:defs");
+  defs.selectAll("marker")
       .data(["end"])      // Different link/path types can be defined here
     .enter().append("svg:marker")    // This section adds in the arrows
       .attr("id", String)
@@ -136,6 +139,8 @@ function initGraph() {
       .attr("orient", "auto")
     .append("svg:path")
       .attr("d", "M0,-5L10,0L0,5");
+
+  appendFilter(defs);
 
   // Adds style directly because it wasn't getting picked up by the style sheet
   var link = svg.selectAll('line.link').data(currentGraph.edges).enter().append('line')
@@ -222,6 +227,44 @@ function initGraph() {
 			});
 		});
   });
+}
+
+/* ******************************************************
+ * Appends a filter to the defs element to be used on the
+ * selected node.
+ *
+ * Takes the svg "defs" element as input.
+ * ******************************************************/
+function appendFilter(defs) {
+  // create filter with id #drop-shadow
+  // height=130% so that the shadow is not clipped
+  var filter = defs.append("filter")
+      .attr("id", "drop-shadow")
+      .attr("height", "200%")
+      .attr("width", "200%")
+      .attr("x", "-50%") // x and y have to have negative offsets to 
+      .attr("y", "-50%"); // stop the edges from getting cut off
+
+  // translate output of Gaussian blur to the right and downwards with 2px
+  // store result in offsetBlur
+  filter.append("feOffset")
+      .attr("in", "SourceAlpha")
+      .attr("dx", 0)
+      .attr("dy", 0)
+      .attr("result", "offOut");
+
+  // SourceAlpha refers to opacity of graphic that this filter will be applied to
+  // convolve that with a Gaussian with standard deviation 3 and store result
+  // in blur
+  filter.append("feGaussianBlur")
+      .attr("in", "offOut")
+      .attr("stdDeviation", 7)
+      .attr("result", "blurOut");
+
+  filter.append("feBlend")
+      .attr("in", "SourceGraphic")
+      .attr("in2", "blurOut")
+      .attr("mode", "normal");
 }
 
 function handlePin(d, el, pinBool) {
