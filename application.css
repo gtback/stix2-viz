@@ -115,8 +115,8 @@ pre {
   stroke-width: 2;
 }
 
-.selected {
-  /*stroke: black;
-  stroke-width: 4;*/
+/*.selected {
+  Moved to html to accomodate Firefox's
+  weird rendering issue
   filter: url(#drop-shadow);
-}
+}*/
