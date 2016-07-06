@@ -43,7 +43,8 @@ var labelGraph = {
 
 var idCache = {};
 
-/* ******************************************************
+/* ----------------------------------------------------- *
+ * ******************************************************
  * This group of functions is for handling file "upload."
  * They take an event as input and parse the file on the
  * front end.
@@ -225,6 +226,12 @@ function initGraph() {
   });
 }
 
+/* ******************************************************
+ * Adds class "selected" to last graph element clicked
+ * and removes it from all other elements.
+ *
+ * Takes datum and element as input.
+ * ******************************************************/
 function handleSelected(d, el) {
   selectedContainer.innerText = JSON.stringify(d, replacer, 2);
   d3.select('.selected').classed('selected', false);
@@ -269,15 +276,14 @@ function appendFilter(defs) {
       .attr("mode", "normal");
 }
 
+/* ******************************************************
+ * Handles pinning and unpinning of nodes.
+ *
+ * Takes datum, element, and boolean as input.
+ * ******************************************************/
 function handlePin(d, el, pinBool) {
   d.fixed = pinBool;
-  //console.log(node);
   d3.select(el).classed("pinned", pinBool);
-  // if (pinBool) {
-  //   node.classed("pinned", );
-  // } else {
-  //   node.classList.remove("pinned");
-  // }
 }
 
 /* ******************************************************
