@@ -144,14 +144,31 @@ function initGraph() {
   appendFilter(defs);
 
   // Adds style directly because it wasn't getting picked up by the style sheet
-  var link = svg.selectAll('line.link').data(currentGraph.edges).enter().append('line')
+  var link = svg.selectAll('path.link').data(currentGraph.edges).enter().append('path')
       .attr('class', 'link')
       .style("stroke", "#aaa")
       .style("stroke-width", "3px")
       .attr("marker-end", "url(#end)"); // Add the arrow to the end of the link
   // Add the text labels to the links
   link.append('title').text(function(d) {return d.label;});
+  link.attr('id', function(d, i) { return "link_" + i; })
   link.on('click', function(d, i) { handleSelected(d, this) });
+
+  var linktext = svg.append("svg:g").selectAll("g.linklabelholder").data(currentGraph.edges);
+  
+  linktext.enter().append("g").attr("class", "linklabelholder")
+   .append("text")
+   .attr("class", "linklabel")
+ .style("font-size", "13px")
+   .attr("x", "3em")
+   .attr("y", "500em")
+   .attr("text-anchor", "start")
+   .style("fill","#000")
+ .append("textPath")
+  .attr("xlink:href",function(d,i) { return "#link_" + i;})
+   .text(function(d) { 
+ return d.label; 
+ });
 
   var node = svg.selectAll("circle.node")
       .data(currentGraph.nodes)
@@ -190,10 +207,13 @@ function initGraph() {
 	}).style("fill", "#555").style("font-family", "Arial").style("font-size", 12);
 
   force.on("tick", function() {
-    link.attr("x1", function(d) { return d.source.x; })
-        .attr("y1", function(d) { return d.source.y; })
-        .attr("x2", function(d) { return d.target.x; })
-        .attr("y2", function(d) { return d.target.y; });
+    
+    link.attr("d", function(d) {
+    var dx = d.target.x - d.source.x,
+        dy = d.target.y - d.source.y;
+        dr = 0; // Change this to make paths curved
+    return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+    });
 
     node.attr("cx", function(d) { return d.x; })
         .attr("cy", function(d) { return d.y; });
@@ -222,7 +242,7 @@ function initGraph() {
 			this.attr("transform", function(d) {
 				return "translate(" + d.x + "," + d.y + ")";
 			});
-		});
+		}); 
   });
 }
 
@@ -393,19 +413,19 @@ function addRelationships(relationships) {
     var rel = relationships[i];
     //var package = {};
     if(idCache[rel.source_ref] === null || idCache[rel.source_ref] === undefined) {
-      if (relationshipsKeyRegex.exec(rel.source_ref)) {
-        console.log("Yo dawg yo source be a relationship");
-        // ...OK, so now what?
-      } else {
+      // if (relationshipsKeyRegex.exec(rel.source_ref)) {
+      //   console.log("Yo dawg yo source be a relationship");
+      //   // ...OK, so now what?
+      // } else {
         console.error("Couldn't find source!", rel);
-      }
+      // }
     } else if (idCache[rel.target_ref] === null || idCache[rel.target_ref] === undefined) {
-      if (relationshipsKeyRegex.exec(rel.target_ref)) {
-        console.log("Yo dawg yo target be a relationship");
-        //package = 
-      } else {
+      // if (relationshipsKeyRegex.exec(rel.target_ref)) {
+      //   console.log("Yo dawg yo target be a relationship");
+      //   //package = 
+      // } else {
         console.error("Couldn't find target!", rel);
-      }
+      // }
     } else {
       //package = {source: idCache[rel.source_ref], target: idCache[rel.target_ref], label: rel.value}
       currentGraph.edges.push({source: idCache[rel.source_ref], target: idCache[rel.target_ref], label: rel.value});
