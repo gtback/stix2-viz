@@ -274,9 +274,41 @@ function initGraph() {
  * Takes datum and element as input.
  * ******************************************************/
 function handleSelected(d, el) {
-  selectedContainer.innerText = JSON.stringify(d, replacer, 2);
+  jsonString = JSON.stringify(d, replacer, 2); // get only the STIX values
+  purified = JSON.parse(jsonString); // make a new JSON object from the STIX values
+  
+  selectedContainer.innerHTML = ""; // Remove old values from HTML
+  //console.log(selectedContainer.childNodes);
+  var counter = 0;
+  Object.keys(purified).forEach(function(key) { // Make new HTML elements and display them
+    var keyString = key;
+    if (refRegex.exec(key)) { // key is "created_by_ref"... let's pretty that up
+      keyString = key.replace(/_(ref)?/g, " ").trim();
+    }
+    keyString += ":";
+    
+    var div = document.createElement('div');
+    var type = document.createElement('div');
+    var val = document.createElement('div');
+    
+    if ((counter % 2) != 0) {
+      div.classList.add("odd"); // every other row will have a grey background
+    }
+
+    type.classList.add("type");
+    val.classList.add("value");
+    type.innerText = keyString;
+    val.innerText = purified[key];
+    
+    div.appendChild(type);
+    div.appendChild(val);
+    selectedContainer.appendChild(div);
+
+    counter += 1;
+  });
+
   d3.select('.selected').classed('selected', false);
-   d3.select(el).classed('selected', true);
+  d3.select(el).classed('selected', true);
 }
 
 /* ******************************************************

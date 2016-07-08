@@ -63,6 +63,28 @@ svg {
   background-color: #fafafa;
 }
 
+#selection > div {
+  margin: .5em 0 .5em 0;
+}
+
+#selection > .odd {
+  background-color: lightgrey;
+}
+
+#selection > div > div {
+  display: inline-block;
+  vertical-align: top;
+}
+
+#selection > div > .type {
+  width: 30%;
+  font-weight: bold;
+}
+
+#selection > div > .value {
+  width: 65%;
+}
+
 #paste-area {
   height: 25em;
   width: 40em;
