@@ -189,8 +189,8 @@ function initGraph() {
      .style("fill","#000")
    .append("textPath")
     .attr("xlink:href",function(d,i) { return "#link_" + i;})
-    .text(function(d) { 
-      return d.label; 
+    .text(function(d) {
+      return d.label;
     });
 
   var node = svg.selectAll("circle.node")
