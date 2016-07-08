@@ -277,9 +277,11 @@ function handleSelected(d, el) {
   jsonString = JSON.stringify(d, replacer, 2); // get only the STIX values
   purified = JSON.parse(jsonString); // make a new JSON object from the STIX values
   
-  selectedContainer.innerHTML = ""; // Remove old values from HTML
-  //console.log(selectedContainer.childNodes);
+  // Remove old values from HTML
+  selectedContainer.innerHTML = "";
+  
   var counter = 0;
+  
   Object.keys(purified).forEach(function(key) { // Make new HTML elements and display them
     var keyString = key;
     if (refRegex.exec(key)) { // key is "created_by_ref"... let's pretty that up
@@ -287,23 +289,40 @@ function handleSelected(d, el) {
     }
     keyString += ":";
     
+    // Create new, empty HTML elements to be filled and injected
     var div = document.createElement('div');
     var type = document.createElement('div');
     var val = document.createElement('div');
     
+    // Assign classes for proper styling
     if ((counter % 2) != 0) {
       div.classList.add("odd"); // every other row will have a grey background
     }
-
     type.classList.add("type");
     val.classList.add("value");
+
+    // Some of the potential values are not very readable (IDs
+    // and object references). Let's see if we can fix that.
+    var value = purified[key];
+    // Lots of assumptions being made about the structure of the JSON here...
+    if (typeof(value) === 'object') {
+      value = value.title;
+    } else if (/--/.exec(value) && !(keyString === "id:")) {
+      if (!(idCache[value] === null || idCache[value] === undefined)) {
+        value = currentGraph.nodes[idCache[value]].title; // IDs are gross, so let's display something more readable if we can (unless it's actually the node id)
+      }
+    }
+
+    // Add the text to the new inner html elements
     type.innerText = keyString;
-    val.innerText = purified[key];
+    val.innerText = value;
     
+    // Add new divs to "Selected Node"
     div.appendChild(type);
     div.appendChild(val);
     selectedContainer.appendChild(div);
 
+    // increment the class counter
     counter += 1;
   });
 

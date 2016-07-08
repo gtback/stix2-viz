@@ -64,11 +64,11 @@ svg {
 }
 
 #selection > div {
-  margin: .5em 0 .5em 0;
+  padding: .5em 0 .5em 2%;
 }
 
 #selection > .odd {
-  background-color: lightgrey;
+  background-color: #e5e5e5;
 }
 
 #selection > div > div {
@@ -93,9 +93,7 @@ svg {
 h2 {
   font-weight: 200;
 }
-/*
- * This is not getting attatched to the lines for some reason...
- */
+
 line, .link {
   stroke-width: 5;
   stroke: #aaa;
