@@ -141,34 +141,57 @@ function initGraph() {
     .append("svg:path")
       .attr("d", "M0,-5L10,0L0,5");
 
-  appendFilter(defs);
+  // create filter with id #drop-shadow
+  // height=130% so that the shadow is not clipped
+  var filter = defs.append("filter")
+      .attr("id", "drop-shadow")
+      .attr("height", "200%")
+      .attr("width", "200%")
+      .attr("x", "-50%") // x and y have to have negative offsets to 
+      .attr("y", "-50%"); // stop the edges from getting cut off
+  // translate output of Gaussian blur to the right and downwards with 2px
+  // store result in offsetBlur
+  filter.append("feOffset")
+      .attr("in", "SourceAlpha")
+      .attr("dx", 0)
+      .attr("dy", 0)
+      .attr("result", "offOut");
+  // SourceAlpha refers to opacity of graphic that this filter will be applied to
+  // convolve that with a Gaussian with standard deviation 3 and store result
+  // in blur
+  filter.append("feGaussianBlur")
+      .attr("in", "offOut")
+      .attr("stdDeviation", 7)
+      .attr("result", "blurOut");
+  filter.append("feBlend")
+      .attr("in", "SourceGraphic")
+      .attr("in2", "blurOut")
+      .attr("mode", "normal");
 
   // Adds style directly because it wasn't getting picked up by the style sheet
   var link = svg.selectAll('path.link').data(currentGraph.edges).enter().append('path')
       .attr('class', 'link')
       .style("stroke", "#aaa")
       .style("stroke-width", "3px")
-      .attr("marker-end", "url(#end)"); // Add the arrow to the end of the link
-  // Add the text labels to the links
-  link.append('title').text(function(d) {return d.label;});
-  link.attr('id', function(d, i) { return "link_" + i; })
-  link.on('click', function(d, i) { handleSelected(d, this) });
+      .attr("marker-end", "url(#end)")// Add the arrow to the end of the link
+      .attr('id', function(d, i) { return "link_" + i; })
+      .on('click', function(d, i) { handleSelected(d, this) });
 
+  // Create the text labels that will be attatched to the paths
   var linktext = svg.append("svg:g").selectAll("g.linklabelholder").data(currentGraph.edges);
-  
   linktext.enter().append("g").attr("class", "linklabelholder")
-   .append("text")
-   .attr("class", "linklabel")
- .style("font-size", "13px")
-   .attr("x", "3em")
-   .attr("y", "500em")
-   .attr("text-anchor", "start")
-   .style("fill","#000")
- .append("textPath")
-  .attr("xlink:href",function(d,i) { return "#link_" + i;})
-   .text(function(d) { 
- return d.label; 
- });
+     .append("text")
+     .attr("class", "linklabel")
+   .style("font-size", "13px")
+     .attr("x", "3em")
+     .attr("y", "5em")
+     .attr("text-anchor", "start")
+     .style("fill","#000")
+   .append("textPath")
+    .attr("xlink:href",function(d,i) { return "#link_" + i;})
+    .text(function(d) { 
+      return d.label; 
+    });
 
   var node = svg.selectAll("circle.node")
       .data(currentGraph.nodes)
@@ -180,11 +203,6 @@ function initGraph() {
   node.on('click', function(d, i) { handleSelected(d, this) }); // If they're holding shift, release
 
   // Fix on click/drag, unfix on double click
-  // Ideally, we could break this out into a function that
-  // just returns !(d.fixed), but for some reason the callback
-  // function of force.drag().on() thinks d.fixed is a number
-  // even when it has been previously set as a boolean.
-  // I don't know, man. Javascript.
   force.drag().on('dragstart', function(d, i) { handlePin(d, this, true) });//d.fixed = true });
   node.on('dblclick', function(d, i) { handlePin(d, this, false) });//d.fixed = false });
 
@@ -206,6 +224,9 @@ function initGraph() {
 		return i % 2 == 0 ? "" : titleFor(d.node);
 	}).style("fill", "#555").style("font-family", "Arial").style("font-size", 12);
 
+  // Code in the "tick" function determines where the elements
+  // should be redrawn every cycle (essentially, it allows the
+  // elements to be animated)
   force.on("tick", function() {
     
     link.attr("d", function(d) {
@@ -256,44 +277,6 @@ function handleSelected(d, el) {
   selectedContainer.innerText = JSON.stringify(d, replacer, 2);
   d3.select('.selected').classed('selected', false);
    d3.select(el).classed('selected', true);
-}
-
-/* ******************************************************
- * Appends a filter to the defs element to be used on the
- * selected node.
- *
- * Takes the svg "defs" element as input.
- * ******************************************************/
-function appendFilter(defs) {
-  // create filter with id #drop-shadow
-  // height=130% so that the shadow is not clipped
-  var filter = defs.append("filter")
-      .attr("id", "drop-shadow")
-      .attr("height", "200%")
-      .attr("width", "200%")
-      .attr("x", "-50%") // x and y have to have negative offsets to 
-      .attr("y", "-50%"); // stop the edges from getting cut off
-
-  // translate output of Gaussian blur to the right and downwards with 2px
-  // store result in offsetBlur
-  filter.append("feOffset")
-      .attr("in", "SourceAlpha")
-      .attr("dx", 0)
-      .attr("dy", 0)
-      .attr("result", "offOut");
-
-  // SourceAlpha refers to opacity of graphic that this filter will be applied to
-  // convolve that with a Gaussian with standard deviation 3 and store result
-  // in blur
-  filter.append("feGaussianBlur")
-      .attr("in", "offOut")
-      .attr("stdDeviation", 7)
-      .attr("result", "blurOut");
-
-  filter.append("feBlend")
-      .attr("in", "SourceGraphic")
-      .attr("in2", "blurOut")
-      .attr("mode", "normal");
 }
 
 /* ******************************************************
@@ -408,29 +391,15 @@ function addTlo(tlo) {
  * Takes an array as input.
  * ******************************************************/
 function addRelationships(relationships) {
-  //var relCache = [];
   for(var i = 0; i < relationships.length; i++) {
     var rel = relationships[i];
-    //var package = {};
     if(idCache[rel.source_ref] === null || idCache[rel.source_ref] === undefined) {
-      // if (relationshipsKeyRegex.exec(rel.source_ref)) {
-      //   console.log("Yo dawg yo source be a relationship");
-      //   // ...OK, so now what?
-      // } else {
-        console.error("Couldn't find source!", rel);
-      // }
+      console.error("Couldn't find source!", rel);
     } else if (idCache[rel.target_ref] === null || idCache[rel.target_ref] === undefined) {
-      // if (relationshipsKeyRegex.exec(rel.target_ref)) {
-      //   console.log("Yo dawg yo target be a relationship");
-      //   //package = 
-      // } else {
-        console.error("Couldn't find target!", rel);
-      // }
+      console.error("Couldn't find target!", rel);
     } else {
-      //package = {source: idCache[rel.source_ref], target: idCache[rel.target_ref], label: rel.value}
       currentGraph.edges.push({source: idCache[rel.source_ref], target: idCache[rel.target_ref], label: rel.value});
     }
-    //currentGraph.edges.push(package);
   }
 }
 
