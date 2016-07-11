@@ -468,7 +468,7 @@ function hideMessages() {
  * Called as the 2nd parameter to JSON.stringify().
  * ******************************************************/
 function replacer(key, value) {
-  var blacklist = ["typeGroup", "index", "weight", "x", "y", "px", "py", "fixed"];
+  var blacklist = ["typeGroup", "index", "weight", "x", "y", "px", "py", "fixed", "dimmed"];
   if (blacklist.indexOf(key) >= 0) {
     return undefined;
   }
