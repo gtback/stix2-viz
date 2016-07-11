@@ -135,7 +135,7 @@ pre {
   stroke-width: 2;
 }
 
-.selected {
-  /* Explicitely specify html file because Firefox's renderer is super picky */
-  filter: url("index.html#drop-shadow");
-}
+/*.selected {
+  >>> This style is in the header of the index.html file for comptibility reasons! <<<
+  filter: url("#drop-shadow");
+}*/
