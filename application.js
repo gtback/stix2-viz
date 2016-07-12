@@ -183,12 +183,11 @@ function initGraph() {
      .append("text")
      .attr("class", "linklabel")
    .style("font-size", "13px")
-     .attr("x", "3em")
-     .attr("y", "5em")
      .attr("text-anchor", "start")
      .style("fill","#000")
    .append("textPath")
     .attr("xlink:href",function(d,i) { return "#link_" + i;})
+    .attr("startOffset", "20%")
     .text(function(d) {
       return d.label;
     });
