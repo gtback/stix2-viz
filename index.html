@@ -15,7 +15,7 @@
   </head>
 
   <body>
-    <h1>STIX Visualizer <span id="chosen-files"></span></h1>
+    <h1><span id="header">STIX Visualizer</span> <span id="chosen-files"></span></h1>
 
     <div id="uploader">
       <p>Drop some STIX 2.0 here!</p>
@@ -29,7 +29,7 @@
       <textarea id="paste-area" name="pasted" placeholder="Copy/Paste JSON data here..."></textarea><br>
       <button id="paste-parser">Parse</button>
     </div>
-    <div id="canvas-container" style="display: none;">
+    <div id="canvas-container" class="hidden">
       <div id="sidebar">
         <div id="legend">
           <h2>Legend</h2>

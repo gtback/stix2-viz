@@ -112,6 +112,10 @@ function handlePackage(package) {
 }
 
 function addToGraph(package) {
+  // Turn header into a "home" "link"
+  var header = document.getElementById('header');
+  header.classList.add('linkish');
+
   buildNodes(package);
   initGraph();
 }
@@ -459,8 +463,8 @@ function addRelationships(relationships) {
  * container
  * ******************************************************/
 function hideMessages() {
-  uploader.style.display = "none";
-  canvasContainer.style.display = "block";
+  uploader.classList.toggle("hidden");
+  canvasContainer.classList.toggle("hidden");
 }
 
 /* ******************************************************
@@ -473,6 +477,41 @@ function replacer(key, value) {
     return undefined;
   }
   return value;
+}
+
+ /* ******************************************************
+  * Returns the page to its original load state
+  * ******************************************************/
+function resetPage() {
+  var header = document.getElementById('header');
+  if (header.classList.contains('linkish')) {
+    hideMessages();
+    resetGraphVariables();
+    document.getElementById('canvas').innerHTML = ""; // empty the svg
+    document.getElementById('files').value = ""; // reset the files input
+    document.getElementById('chosen-files').innerHTML = ""; // reset the subheader text
+
+    header.classList.remove('linkish');
+  }
+}
+
+/* ******************************************************
+ * Resets Graph variables so the graph can be rebuilt
+ * *****************************************************/
+function resetGraphVariables() {
+  typeGroups = {};
+  typeIndex = 0;
+
+  currentGraph = {
+    nodes: [],
+    edges: []
+  }
+  labelGraph = {
+    nodes: [],
+    edges: []
+  }
+
+  idCache = {};
 }
 
 /* ******************************************************
@@ -500,5 +539,6 @@ function fetchJsonAjax(url, cfunc) {
 document.getElementById('files').addEventListener('change', handleFileSelect, false);
 document.getElementById('paste-parser').addEventListener('click', handleTextarea, false);
 document.getElementById('fetch-url').addEventListener('click', handleFetchJson, false);
+document.getElementById('header').addEventListener('click', resetPage, false);
 uploader.addEventListener('dragover', handleDragOver, false);
 uploader.addEventListener('drop', handleFileDrop, false);
