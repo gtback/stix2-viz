@@ -5,7 +5,7 @@
 // Config
 var d3Config = {
   color: d3.scale.category20(),
-  nodeSize: 10,
+  nodeSize: 18,
   linkMultiplier: 20
 }
 
@@ -197,13 +197,21 @@ function initGraph() {
       return d.label;
     });
 
-  var node = svg.selectAll("circle.node")
+  var node = svg.selectAll("g.node")
       .data(currentGraph.nodes)
-    .enter().append("circle")
-      .attr("class", "node")
+    .enter()
+      .append("g")
+        .attr("class", "node")
+        .call(force.drag); // <-- What does the "call()" function do?
+    node.append("circle")
       .attr("r", d3Config.nodeSize)
-      .style("fill", function(d) { return d3Config.color(d.typeGroup); })
-      .call(force.drag); // <-- What does the "call()" function do?
+      .style("fill", function(d) { return d3Config.color(d.typeGroup); });
+    node.append("image")
+      .attr("xlink:href", function(d) { return "icons/stix2_" + d.type.replace('-', '_') + "_icon_tiny_round_v1.png"; })
+      .attr("x", "-"+d3Config.nodeSize+"px")
+      .attr("y", "-"+d3Config.nodeSize+"px")
+      .attr("width", "37px")
+      .attr("height", "37px");
   node.on('click', function(d, i) { handleSelected(d, this) }); // If they're holding shift, release
 
   // Fix on click/drag, unfix on double click
@@ -240,8 +248,11 @@ function initGraph() {
     return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
     });
 
-    node.attr("cx", function(d) { return d.x; })
-        .attr("cy", function(d) { return d.y; });
+    node.call(function() {
+      this.attr("transform", function(d) {
+        return "translate(" + d.x + "," + d.y + ")";
+      });
+    });
 
     anchorNode.each(function(d, i) {
       labelForce.start();
