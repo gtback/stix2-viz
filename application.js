@@ -5,7 +5,8 @@
 // Config
 var d3Config = {
   color: d3.scale.category20(),
-  nodeSize: 18,
+  nodeSize: 17.5,
+  iconSize: 37,
   linkMultiplier: 20
 }
 
@@ -199,19 +200,18 @@ function initGraph() {
 
   var node = svg.selectAll("g.node")
       .data(currentGraph.nodes)
-    .enter()
-      .append("g")
-        .attr("class", "node")
-        .call(force.drag); // <-- What does the "call()" function do?
+    .enter().append("g")
+      .attr("class", "node")
+      .call(force.drag); // <-- What does the "call()" function do?
     node.append("circle")
       .attr("r", d3Config.nodeSize)
       .style("fill", function(d) { return d3Config.color(d.typeGroup); });
     node.append("image")
       .attr("xlink:href", function(d) { return "icons/stix2_" + d.type.replace('-', '_') + "_icon_tiny_round_v1.png"; })
-      .attr("x", "-"+d3Config.nodeSize+"px")
-      .attr("y", "-"+d3Config.nodeSize+"px")
-      .attr("width", "37px")
-      .attr("height", "37px");
+      .attr("x", "-" + (d3Config.nodeSize + 0.5) + "px")
+      .attr("y", "-" + (d3Config.nodeSize + 1.5)  + "px")
+      .attr("width", d3Config.iconSize + "px")
+      .attr("height", d3Config.iconSize + "px");
   node.on('click', function(d, i) { handleSelected(d, this) }); // If they're holding shift, release
 
   // Fix on click/drag, unfix on double click

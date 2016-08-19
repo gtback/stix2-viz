@@ -40,6 +40,10 @@ svg {
   color: #333;
 }
 
+#canvas-wrapper {
+  margin: 25px;
+}
+
 #sidebar {
   position: absolute;
   right: 25px;
@@ -132,7 +136,7 @@ pre {
 
 .pinned {
   stroke: black;
-  stroke-width: 2;
+  stroke-width: 5;
 }
 
 .linkish:hover {
