@@ -111,19 +111,20 @@ ul {
 }
 
 li {
-  padding: 0;
+  padding: 5px 0px;
   margin: 0;
 }
 
 ul li div {
-  width: 30px;
-  height: 12px;
+  width: 37px;
+  height: 37px;
   display: inline-block;
+  vertical-align: middle;
 }
 
 ul > li > p {
   display: inline-block;
-  margin: 5px;
+  margin: 5px 10px;
 }
 
 pre {

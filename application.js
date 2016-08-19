@@ -382,7 +382,7 @@ function buildNodes(package) {
     var li = document.createElement('li');
     var val = document.createElement('p');
     var key = document.createElement('div');
-    key.style.backgroundColor = d3Config.color(typeGroups[typeName]);
+    key.style.backgroundImage = "url('icons/stix2_" + typeName.replace('-', '_') + "_icon_tiny_round_v1.png')";
     val.innerText = typeName;
     li.appendChild(key);
     li.appendChild(val);
