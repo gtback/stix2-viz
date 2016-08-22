@@ -8,8 +8,8 @@ It makes a lot of assumptions is how! It assumes:
 
 - The source - a file you upload, text you paste, or an external server - provides valid JSON
 - That JSON has a bunch of keys and values, some of which are arrays
-- Everything inside those arrays is a TLO, with an ID, type, and ideally title
-- One of those arrays contains a list of relationships between the other TLOs provided
+- Everything inside those arrays is an SDO, with an ID, type, and ideally title
+- One of those arrays contains a list of relationships between the other SDOs provided
 
 This should match most STIX 2.0 content inside a package. For a slightly out-of-date example, look at `test.json`.
 
@@ -22,3 +22,8 @@ If you want to load another JSON file, just click on the title at the top of the
 ### How can I use it?
 
 Go to [http://yarthepirate.github.io/stix2-viz](http://yarthepirate.github.io/stix2-viz). Upload a JSON file, paste some valid JSON text, or provide the URL for an external JSON file. Hope for the best.
+
+### License
+The source code is copyright (c) 2016, The MITRE Corporation. All rights reserved. See LICENSE.txt for complete terms.
+
+The icons used in the generated graphs are by Bret Jordan, licensed under the Creative Commons Attribution-ShareAlike (CC BY-SA) License, Version 4.0.
