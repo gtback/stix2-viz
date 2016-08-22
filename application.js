@@ -301,7 +301,10 @@ function handleSelected(d, el) {
     var keyString = key;
     if (refRegex.exec(key)) { // key is "created_by_ref"... let's pretty that up
       keyString = key.replace(/_(ref)?/g, " ").trim();
+    } else {
+      keyString = keyString.replace(/_/g, ' ');
     }
+    keyString = keyString.charAt(0).toUpperCase() + keyString.substr(1).toLowerCase() // Capitalize it
     keyString += ":";
     
     // Create new, empty HTML elements to be filled and injected
@@ -324,7 +327,7 @@ function handleSelected(d, el) {
       value = value.join(", ")
     } else if (typeof(value) === 'object') {
       value = value.name;
-    } else if (/--/.exec(value) && !(keyString === "id:")) {
+    } else if (/--/.exec(value) && !(keyString === "Id:")) {
       if (!(idCache[value] === null || idCache[value] === undefined)) {
         value = currentGraph.nodes[idCache[value]].name; // IDs are gross, so let's display something more readable if we can (unless it's actually the node id)
       }
@@ -385,7 +388,7 @@ function buildNodes(package) {
     var val = document.createElement('p');
     var key = document.createElement('div');
     key.style.backgroundImage = "url('icons/stix2_" + typeName.replace('-', '_') + "_icon_tiny_round_v1.png')";
-    val.innerText = typeName;
+    val.innerText = typeName.charAt(0).toUpperCase() + typeName.substr(1).toLowerCase(); // Capitalize it
     li.appendChild(key);
     li.appendChild(val);
     ul.appendChild(li);
