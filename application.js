@@ -506,6 +506,7 @@ function resetPage() {
     document.getElementById('canvas').innerHTML = ""; // empty the svg
     document.getElementById('files').value = ""; // reset the files input
     document.getElementById('chosen-files').innerHTML = ""; // reset the subheader text
+    document.getElementById('legend-content').innerHTML = ""; // reset the legend in the sidebar
 
     header.classList.remove('linkish');
   }
