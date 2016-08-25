@@ -138,7 +138,7 @@ function initGraph() {
     .enter().append("svg:marker")    // This section adds in the arrows
       .attr("id", String)
       .attr("viewBox", "0 -5 10 10")
-      .attr("refX", 15)
+      .attr("refX", d3Config.nodeSize + 3)
       .attr("refY", 0)
       .attr("markerWidth", 6)
       .attr("markerHeight", 6)
@@ -233,7 +233,7 @@ function initGraph() {
   var anchorNode = svg.selectAll("g.anchorNode").data(labelForce.nodes()).enter().append("svg:g").attr("class", "anchorNode");
   anchorNode.append("svg:circle").attr("r", 0).style("fill", "#FFF");
 		anchorNode.append("svg:text").text(function(d, i) {
-		return i % 2 == 0 ? "" : titleFor(d.node);
+		return i % 2 == 0 ? "" : nameFor(d.node);
 	}).style("fill", "#555").style("font-family", "Arial").style("font-size", 12);
 
   // Code in the "tick" function determines where the elements
@@ -301,7 +301,10 @@ function handleSelected(d, el) {
     var keyString = key;
     if (refRegex.exec(key)) { // key is "created_by_ref"... let's pretty that up
       keyString = key.replace(/_(ref)?/g, " ").trim();
+    } else {
+      keyString = keyString.replace(/_/g, ' ');
     }
+    keyString = keyString.charAt(0).toUpperCase() + keyString.substr(1).toLowerCase() // Capitalize it
     keyString += ":";
     
     // Create new, empty HTML elements to be filled and injected
@@ -320,11 +323,13 @@ function handleSelected(d, el) {
     // and object references). Let's see if we can fix that.
     var value = purified[key];
     // Lots of assumptions being made about the structure of the JSON here...
-    if (typeof(value) === 'object') {
-      value = value.title;
-    } else if (/--/.exec(value) && !(keyString === "id:")) {
+    if (Array.isArray(value)) {
+      value = value.join(", ")
+    } else if (typeof(value) === 'object') {
+      value = value.name;
+    } else if (/--/.exec(value) && !(keyString === "Id:")) {
       if (!(idCache[value] === null || idCache[value] === undefined)) {
-        value = currentGraph.nodes[idCache[value]].title; // IDs are gross, so let's display something more readable if we can (unless it's actually the node id)
+        value = currentGraph.nodes[idCache[value]].name; // IDs are gross, so let's display something more readable if we can (unless it's actually the node id)
       }
     }
 
@@ -363,11 +368,11 @@ function handlePin(d, el, pinBool) {
  * ******************************************************/
 function buildNodes(package) {
   var relationships = [];
-  // Iterate through each key on the package. If it's an array, assume every item is a TLO.
+  // Iterate through each key on the package. If it's an array, assume every item is an SDO.
   Object.keys(package).forEach(function(key) {
     if(package[key].constructor === Array) {
-      if (!(relationshipsKeyRegex.exec(key))) { // Relationships are NOT ordinary TLOs
-        parseTLOs(package[key]);
+      if (!(relationshipsKeyRegex.exec(key))) { // Relationships are NOT ordinary SDOs
+        parseSDOs(package[key]);
       } else {
         relationships = package[key];
       }
@@ -383,7 +388,7 @@ function buildNodes(package) {
     var val = document.createElement('p');
     var key = document.createElement('div');
     key.style.backgroundImage = "url('icons/stix2_" + typeName.replace('-', '_') + "_icon_tiny_round_v1.png')";
-    val.innerText = typeName;
+    val.innerText = typeName.charAt(0).toUpperCase() + typeName.substr(1).toLowerCase(); // Capitalize it
     li.appendChild(key);
     li.appendChild(val);
     ul.appendChild(li);
@@ -391,56 +396,56 @@ function buildNodes(package) {
 }
 
 /* ******************************************************
- * Adds a title to a TLO Node
+ * Adds a name to an SDO Node
  * ******************************************************/
-function titleFor(tlo) {
-  if(tlo.type === 'relationship') {
-    return "rel: " + (tlo.value);
-  } else if (tlo.title !== undefined) {
-    return tlo.title;
+function nameFor(sdo) {
+  if(sdo.type === 'relationship') {
+    return "rel: " + (sdo.value);
+  } else if (sdo.name !== undefined) {
+    return sdo.name;
   } else {
-    return tlo.type;
+    return sdo.type;
   }
 }
 
 /* ******************************************************
- * Parses valid TLOs from an array of potential TLO
+ * Parses valid SDOs from an array of potential SDO
  * objects (ideally from the data object)
  * 
  * Takes an array of objects as input.
  * ******************************************************/
-function parseTLOs(container) {
+function parseSDOs(container) {
   var cap = container.length;
   for(var i = 0; i < cap; i++) {
-    // So, in theory, each of these should be a TLO. To be sure, we'll check to make sure it has an `id` and `type`. If not, raise an error and ignore it.
-    var maybeTlo = container[i];
-    if(maybeTlo.id === undefined || maybeTlo.type === undefined) {
-      console.error("Should this be a TLO???", maybeTlo)
+    // So, in theory, each of these should be an SDO. To be sure, we'll check to make sure it has an `id` and `type`. If not, raise an error and ignore it.
+    var maybeSdo = container[i];
+    if(maybeSdo.id === undefined || maybeSdo.type === undefined) {
+      console.error("Should this be an SDO???", maybeSdo)
     } else {
-      addTlo(maybeTlo);
+      addSdo(maybeSdo);
     }
   }
 }
 
 /* ******************************************************
- * Adds a TLO node to the graph
+ * Adds an SDO node to the graph
  * 
- * Takes a valid TLO object as input.
+ * Takes a valid SDO object as input.
  * ******************************************************/
-function addTlo(tlo) {
-  if(idCache[tlo.id]) {
-    console.log("Already added, skipping!", tlo)
+function addSdo(sdo) {
+  if(idCache[sdo.id]) {
+    console.log("Already added, skipping!", sdo)
   } else {
-    if(typeGroups[tlo.type] === undefined) {
-      typeGroups[tlo.type] = typeIndex++;
+    if(typeGroups[sdo.type] === undefined) {
+      typeGroups[sdo.type] = typeIndex++;
     }
-    tlo.typeGroup = typeGroups[tlo.type];
+    sdo.typeGroup = typeGroups[sdo.type];
 
-    idCache[tlo.id] = currentGraph.nodes.length; // Edges reference nodes by their array index, so cache the current length. When we add, it will be correct
-    currentGraph.nodes.push(tlo);
+    idCache[sdo.id] = currentGraph.nodes.length; // Edges reference nodes by their array index, so cache the current length. When we add, it will be correct
+    currentGraph.nodes.push(sdo);
 
-    labelGraph.nodes.push({node: tlo}); // Two labels will orbit the node, we display the less crowded one and hide the more crowded one.
-    labelGraph.nodes.push({node: tlo});
+    labelGraph.nodes.push({node: sdo}); // Two labels will orbit the node, we display the less crowded one and hide the more crowded one.
+    labelGraph.nodes.push({node: sdo});
 
     labelGraph.edges.push({
 			source : (labelGraph.nodes.length - 2),
@@ -464,7 +469,7 @@ function addRelationships(relationships) {
     } else if (idCache[rel.target_ref] === null || idCache[rel.target_ref] === undefined) {
       console.error("Couldn't find target!", rel);
     } else {
-      currentGraph.edges.push({source: idCache[rel.source_ref], target: idCache[rel.target_ref], label: rel.value});
+      currentGraph.edges.push({source: idCache[rel.source_ref], target: idCache[rel.target_ref], label: rel.relationship_type});
     }
   }
 }
